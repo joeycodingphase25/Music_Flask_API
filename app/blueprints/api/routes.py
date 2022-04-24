@@ -71,10 +71,59 @@ def edit_post(key_sig_id):
 
 # Get all Key Signatures
 @api.route('/key-signatures')
-def get_posts():
+def get_keys():
     key_sigs = Keysignature.query.all()
     return jsonify([k.to_dict() for k in key_sigs])
 
 ################################################
-###### ERA ROUTES ####################
+################ ERA ROUTES ####################
+################################################
+
+# Get all eras 
+# #// NESTED LIST OF COMPOSERS AND COMPOSER NESTED WITH SONGS
+@api.route('/eras')
+def get_eras():
+    eras = Era.query.all()
+    ## Note that dict of composer objects populate under "composers" key
+    return jsonify([e.to_dict() for e in eras])
+
+
+# CREATE AN ERA
+@api.route('/era/create', methods=['POST'])
+@token_auth.login_required
+def create_era():
+    if not request.is_json:
+        return jsonify({'error': 'Your request content-type must be application/json'}), 400
+    # Get data from request body
+    data = request.json
+    # Check to make sure all required fields are present
+    for field in ['era', 'about_era', 'more_info']:
+        if field not in data:
+            # if not return a 400 response with error
+            return jsonify({'error': f'{field} must be in request body'}), 400
+    # Get fields from data dict
+    era = data['era']
+    about_era = data['about_era']
+    more_info = data['more_info']
+    new_era=Era(era=era, about_era=about_era, more_info=more_info)
+    return jsonify(new_era.to_dict()), 201
+
+# EDIT AN ERA
+@api.route('/era/update/<int:era_id>', methods=['PUT'])
+@token_auth.login_required
+def edit_era(era_id):
+    if not request.is_json:
+        return jsonify({'error': 'Your request content-type must be application/json'}), 400
+    data = request.json
+    for key in data.keys():
+        if key not in {'era', 'about_era', 'more_info'}:
+            return jsonify({'error': f'{key} is not an acceptable property'}), 400
+    # filter object needs to be here for some reason
+    era = Era.query.filter_by(id=era_id).first()
+    era.update(**data)
+    return jsonify(era.to_dict())
+
+
+################################################
+################ ERA ROUTES ####################
 ################################################
