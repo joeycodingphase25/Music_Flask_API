@@ -68,6 +68,7 @@ class User(db.Model, UserMixin):
         }
 
 ## flask shell tester -- new_key=Keysignature(key_signature='C Major', keys='13568acd', about='This is about section test', more_info='this is more_info test')
+## this works --> key.update(about="updated about")
 ################################
 #########-KEY-SIGNATURE##########
 ## Key signature will be a attached as a foreign key to SONGS
@@ -144,8 +145,9 @@ class Era(db.Model):
             # dont really need to json the ID here
             'era': self.era,
             'about_era': self.about_era,
-            'more_info': self.more_info
-            # 'composers': [composer.to_dict() for composer in Composer.filter_by(id=self.composers)]
+            'more_info': self.more_info,
+            ## still broken
+            'composers': [composer.to_dict() for composer in Composer.query.filter_by(era_id=self.id).all()]
         }
 
 
@@ -192,8 +194,9 @@ class Composer(db.Model):
             'composer_name': self.composer_name,
             'more_info': self.more_info,
             'famous_work': self.famous_work,
-            'era': self.more_info
-            # 'songs': [song.to_dict for song in Song.filter_by(composer=self.composer_name).all()]
+            'era': self.more_info,
+            # broken too lmao
+            'songs': [song.to_dict() for song in Song.query.filter_by(composer_id=self.id).all()]
         }        
 
 
