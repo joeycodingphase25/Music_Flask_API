@@ -146,7 +146,7 @@ class Era(db.Model):
             'era': self.era,
             'about_era': self.about_era,
             'more_info': self.more_info,
-            ## still broken
+            ## functioning
             'composers': [composer.to_dict() for composer in Composer.query.filter_by(era_id=self.id).all()]
         }
 
@@ -161,7 +161,6 @@ class Composer(db.Model):
     composer_name = db.Column(db.String(100), nullable=False, unique=True)
     more_info = db.Column(db.String()) # WILL BE A STRING, can be manipulated later
     famous_work = db.Column(db.String())
-    ### FIX THIS
     era_id = db.Column(db.Integer, db.ForeignKey('era.id'), nullable=False)
     composer_id = db.relationship('Song', backref='composer', lazy=True)
 
@@ -195,7 +194,7 @@ class Composer(db.Model):
             'more_info': self.more_info,
             'famous_work': self.famous_work,
             'era': self.more_info,
-            # broken too lmao
+            # fixed
             'songs': [song.to_dict() for song in Song.query.filter_by(composer_id=self.id).all()]
         }        
 
