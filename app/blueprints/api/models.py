@@ -77,7 +77,7 @@ class Keysignature(db.Model):
     keys = db.Column(db.String(24), nullable=False) # WILL BE A STRING, can be manipulated later
     about = db.Column(db.String(), nullable=False)
     more_info = db.Column(db.String(), nullable=False)
-    # songs = db.relationship('Song', backref='keysignature', lazy=True)
+    songs = db.relationship('Song', backref='keysignature', lazy=True)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -117,7 +117,7 @@ class Era(db.Model):
     era = db.Column(db.String(150), nullable=False, unique=True)
     about_era = db.Column(db.String(), nullable=False) 
     more_info = db.Column(db.String(), nullable=False) 
-    # composers = db.relationship('Composer', backref='era', lazy=True)
+    composers = db.relationship('Composer', backref='era', lazy=True)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -147,94 +147,99 @@ class Era(db.Model):
             'more_info': self.more_info
             # 'composers': [composer.to_dict() for composer in Composer.filter_by(id=self.composers)]
         }
-# ################################
-# #########-Composer-##########
-# ## contains the music_era foreign key
-# ## Serves as Foreign key for Song
-# class Composer(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     composer_name = db.Column(db.String(100), nullable=False, unique=True)
-#     more_info = db.Column(db.String()) # WILL BE A STRING, can be manipulated later
-#     famous_work = db.Column(db.String())
-#     ### FIX THIS
-#     era_id = db.Column(db.Integer, db.ForeignKey('era.id'), nullable=False)
-#     composer_id = db.relationship('Song', backref='composer', lazy=True)
 
 
-#     def __init__(self, **kwargs):
-#         super().__init__(**kwargs)
-#         db.session.add(self)
-#         db.session.commit()
+## flask composer test -- new_comp=Composer(composer_name='Chopin', more_info='composer moreinfo test', famous_work='etudes', era_id=1)
+################################
+#########-Composer-##########
+## contains the music_era foreign key
+## Serves as Foreign key for Song
+class Composer(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    composer_name = db.Column(db.String(100), nullable=False, unique=True)
+    more_info = db.Column(db.String()) # WILL BE A STRING, can be manipulated later
+    famous_work = db.Column(db.String())
+    ### FIX THIS
+    era_id = db.Column(db.Integer, db.ForeignKey('era.id'), nullable=False)
+    composer_id = db.relationship('Song', backref='composer', lazy=True)
 
-#     def __repr__(self):
-#         # object display method
-#         return f"< Composer|{self.composer_name}>"
 
-#     def update(self, **kwargs):
-#         for key, value in kwargs.items():
-#             # can update all values for this shell model
-#             if key in {'composer_name', 'more_info', 'famous_work'}: # cant update foreign keyssssss *probably
-#                 setattr(self, key, value)
-#         db.session.commit()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        db.session.add(self)
+        db.session.commit()
+
+    def __repr__(self):
+        # object display method
+        return f"< Composer|{self.composer_name}>"
+
+    def update(self, **kwargs):
+        for key, value in kwargs.items():
+            # can update all values for this shell model
+            if key in {'composer_name', 'more_info', 'famous_work'}: # cant update foreign keyssssss *probably
+                setattr(self, key, value)
+        db.session.commit()
     
-#     def delete(self):
-#         db.session.delete(self)
-#         db.session.commit()
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
 
-#     def to_dict(self):
-#         ## IMPORTANT ADDED THE SONGS AS A TO_DICT INSTEAD OF A RELATIONSHIP
-#         ## THIS IS BECAUSE WE WANT A LIST OF SONGS TO POPULATE
-#         return {
-#             # dont really need to json the ID here
-#             'composer_name': self.composer_name,
-#             'more_info': self.more_info,
-#             'famous_work': self.famous_work,
-#             'era': self.more_info,
-#             'songs': [song.to_dict for song in Song.filter_by(composer=self.composer_name).all()]
-#         }        
+    def to_dict(self):
+        ## IMPORTANT ADDED THE SONGS AS A TO_DICT INSTEAD OF A RELATIONSHIP
+        ## THIS IS BECAUSE WE WANT A LIST OF SONGS TO POPULATE
+        return {
+            # dont really need to json the ID here
+            'composer_name': self.composer_name,
+            'more_info': self.more_info,
+            'famous_work': self.famous_work,
+            'era': self.more_info
+            # 'songs': [song.to_dict for song in Song.filter_by(composer=self.composer_name).all()]
+        }        
 
-# ################################
-# #########-SONGS-##########
-# ## contains the foreign key 'key_signature'
-# ## contains the foreign key 'composer'
-# class Song(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     song_name = db.Column(db.String(100), nullable=False)
-#     song_info = db.Column(db.String(), nullable=False) 
-#     song_link = db.Column(db.String())
-#     more_info = db.Column(db.String(), nullable=False)
-#     keysignature_id = db.Column(db.Integer, db.ForeignKey('keysignature.id'), nullable=False)
-#     composer_id = db.Column(db.Integer, db.ForeignKey('composer.id'), nullable=False)
 
-#     def __init__(self, **kwargs):
-#         super().__init__(**kwargs)
-#         db.session.add(self)
-#         db.session.commit()
+## flask shell song test -- new_song=Song(song_name='Op 28 No 1', song_info='prelude', song_link='link test', more_info='more info test', keysignature_id=1, composer_id=1)
+################################
+#########-SONGS-##########
+## contains the foreign key 'key_signature'
+## contains the foreign key 'composer'
+class Song(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    song_name = db.Column(db.String(100), nullable=False)
+    song_info = db.Column(db.String(), nullable=False) 
+    song_link = db.Column(db.String())
+    more_info = db.Column(db.String(), nullable=False)
+    keysignature_id = db.Column(db.Integer, db.ForeignKey('keysignature.id'), nullable=False)
+    composer_id = db.Column(db.Integer, db.ForeignKey('composer.id'), nullable=False)
 
-#     def __repr__(self):
-#         # object display method
-#         return f"<Song|{self.song_name}>"
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        db.session.add(self)
+        db.session.commit()
 
-#     def update(self, **kwargs):
-#         for key, value in kwargs.items():
-#             # can update all values for this shell model
-#             if key in {'song_name', 'song_info', 'song_link', 'more_info', 'key_singature'}:
-#                 setattr(self, key, value)
-#         db.session.commit()
+    def __repr__(self):
+        # object display method
+        return f"<Song|{self.song_name}>"
+
+    def update(self, **kwargs):
+        for key, value in kwargs.items():
+            # can update all values for this shell model
+            if key in {'song_name', 'song_info', 'song_link', 'more_info', 'key_singature'}:
+                setattr(self, key, value)
+        db.session.commit()
     
-#     def delete(self):
-#         db.session.delete(self)
-#         db.session.commit()
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
 
-#     def to_dict(self):
-#         return {
-#             # dont really need to json the ID here
-#             'song_name': self.song_name,
-#             'song_info': self.song_info,
-#             'song_link': self.song_link,
-#             'more_info': self.more_info,
-#             'keysignature_id': self.keysignature_id,
-#             'composer_id': self.composer_id
-#         }
+    def to_dict(self):
+        return {
+            # dont really need to json the ID here
+            'song_name': self.song_name,
+            'song_info': self.song_info,
+            'song_link': self.song_link,
+            'more_info': self.more_info,
+            'keysignature_id': self.keysignature_id,
+            'composer_id': self.composer_id
+        }
 
 
