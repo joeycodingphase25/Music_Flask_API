@@ -160,7 +160,7 @@ class Composer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     composer_name = db.Column(db.String(100), nullable=False, unique=True)
     more_info = db.Column(db.String()) # WILL BE A STRING, can be manipulated later
-    famous_work = db.Column(db.String())
+    image_url = db.Column(db.String())
     era_id = db.Column(db.Integer, db.ForeignKey('era.id'), nullable=False)
     composer_id = db.relationship('Song', backref='composer', lazy=True)
 
@@ -177,7 +177,7 @@ class Composer(db.Model):
     def update(self, **kwargs):
         for key, value in kwargs.items():
             # can update all values for this shell model
-            if key in {'composer_name', 'more_info', 'famous_work'}: # cant update foreign keyssssss *probably
+            if key in {'composer_name', 'more_info', 'image_url', 'era_id', 'composer_id'}: # cant update foreign keyssssss *probably
                 setattr(self, key, value)
         db.session.commit()
     
@@ -192,7 +192,7 @@ class Composer(db.Model):
             # dont really need to json the ID here
             'composer_name': self.composer_name,
             'more_info': self.more_info,
-            'famous_work': self.famous_work,
+            'image_url': self.image_url,
             'era': self.more_info,
             # fixed
             'songs': [song.to_dict() for song in Song.query.filter_by(composer_id=self.id).all()]
@@ -209,7 +209,8 @@ class Song(db.Model):
     song_name = db.Column(db.String(100), nullable=False)
     song_info = db.Column(db.String(), nullable=False) 
     song_link = db.Column(db.String())
-    more_info = db.Column(db.String(), nullable=False)
+    more_info = db.Column(db.String())
+    difficulty = db.Column(db.String())
     keysignature_id = db.Column(db.Integer, db.ForeignKey('keysignature.id'), nullable=False)
     composer_id = db.Column(db.Integer, db.ForeignKey('composer.id'), nullable=False)
 
@@ -225,7 +226,7 @@ class Song(db.Model):
     def update(self, **kwargs):
         for key, value in kwargs.items():
             # can update all values for this shell model
-            if key in {'song_name', 'song_info', 'song_link', 'more_info', 'key_singature'}:
+            if key in {'song_name', 'song_info', 'song_link', 'more_info', 'difficulty', 'key_singature'}:
                 setattr(self, key, value)
         db.session.commit()
     
@@ -240,6 +241,7 @@ class Song(db.Model):
             'song_info': self.song_info,
             'song_link': self.song_link,
             'more_info': self.more_info,
+            'difficulty': self.difficulty,
             'keysignature_id': self.keysignature_id,
             'composer_id': self.composer_id
         }
