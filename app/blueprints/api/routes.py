@@ -125,5 +125,54 @@ def edit_era(era_id):
 
 
 ################################################
-################ ERA ROUTES ####################
+############ COMPOSER ROUTES ###################
+################################################
+
+# Get all Composers
+# #// NESTED LIST OF SONGS
+@api.route('/composers')
+def get_composers():
+    composers = Composer.query.all()
+    ## Note that dict of composer objects populate under "composers" key
+    return jsonify([c.to_dict() for c in composers])
+
+# CREATE A COMPOSER
+@api.route('/composer/create', methods=['POST'])
+@token_auth.login_required
+def create_composer():
+    if not request.is_json:
+        return jsonify({'error': 'Your request content-type must be application/json'}), 400
+    # Get data from request body
+    data = request.json
+    # Check to make sure all required fields are present
+    for field in ['composer_name', 'more_info', 'image_url', 'era_id']:
+        if field not in data:
+            # if not return a 400 response with error
+            return jsonify({'error': f'{field} must be in request body'}), 400
+    # Get fields from data dict
+    composer_name = data['composer_name']
+    image_url = data['image_url']
+    more_info = data['more_info']
+    era_id = data['era_id']
+    new_composer=Composer(composer_name=composer_name, image_url=image_url, more_info=more_info, era_id=era_id)
+    return jsonify(new_composer.to_dict()), 201
+
+# EDIT A COMPOSER
+@api.route('/composer/update/<int:composer_id>', methods=['PUT'])
+@token_auth.login_required
+def edit_composer(composer_id):
+    if not request.is_json:
+        return jsonify({'error': 'Your request content-type must be application/json'}), 400
+    data = request.json
+    for key in data.keys():
+        if key not in {'composer_name', 'more_info', 'image_url', 'era_id'}:
+            return jsonify({'error': f'{key} is not an acceptable property'}), 400
+    # filter object needs to be here for some reason
+    composer = Composer.query.filter_by(id=composer_id).first()
+    composer.update(**data)
+    return jsonify(composer.to_dict())
+
+
+################################################
+################ SONG ROUTES ###################
 ################################################
