@@ -176,3 +176,51 @@ def edit_composer(composer_id):
 ################################################
 ################ SONG ROUTES ###################
 ################################################
+
+# Get all Songs
+# #// NESTED LIST OF SONGS
+@api.route('/songs')
+def get_songs():
+    songs = Song.query.all()
+    ## Note that dict of composer objects populate under "composers" key
+    return jsonify([s.to_dict() for s in songs])
+
+
+# CREATE A SONG
+@api.route('/song/create', methods=['POST'])
+@token_auth.login_required
+def create_song():
+    if not request.is_json:
+        return jsonify({'error': 'Your request content-type must be application/json'}), 400
+    # Get data from request body
+    data = request.json
+    # Check to make sure all required fields are present
+    for field in ['song_name', 'song_info', 'song_link', 'more_info', 'difficulty', 'keysignature_id', 'composer_id']:
+        if field not in data:
+            # if not return a 400 response with error
+            return jsonify({'error': f'{field} must be in request body'}), 400
+    # Get fields from data dict
+    song_name = data['song_name']
+    song_info = data['song_info']
+    song_link = data['song_link']
+    difficulty = data['difficulty']
+    keysignature_id = data['keysignature_id']
+    composer_id = data['composer_id']
+    new_song=Song(song_name=song_name, song_info=song_info, song_link=song_link, difficulty=difficulty, keysignature_id=keysignature_id, composer_id=composer_id)
+    return jsonify(new_song.to_dict()), 201
+
+# EDIT A SONG
+@api.route('/song/update/<int:song_id>', methods=['PUT'])
+@token_auth.login_required
+def edit_song(song_id):
+    if not request.is_json:
+        return jsonify({'error': 'Your request content-type must be application/json'}), 400
+    data = request.json
+    for key in data.keys():
+        if key not in {'song_name', 'song_info', 'song_link', 'more_info', 'difficulty', 'keysignature_id', 'composer_id'}:
+            return jsonify({'error': f'{key} is not an acceptable property'}), 400
+    # filter object needs to be here for some reason
+    song = Song.query.filter_by(id=song_id).first()
+    song.update(**data)
+    return jsonify(song.to_dict())
+

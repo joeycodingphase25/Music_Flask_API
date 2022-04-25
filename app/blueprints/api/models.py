@@ -226,7 +226,7 @@ class Song(db.Model):
     def update(self, **kwargs):
         for key, value in kwargs.items():
             # can update all values for this shell model
-            if key in {'song_name', 'song_info', 'song_link', 'more_info', 'difficulty', 'key_singature'}:
+            if key in {'song_name', 'song_info', 'song_link', 'more_info', 'difficulty', 'keysignature_id', 'composer_id'}:
                 setattr(self, key, value)
         db.session.commit()
     
