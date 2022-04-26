@@ -85,6 +85,17 @@ class Keysignature(db.Model):
         db.session.add(self)
         db.session.commit()
 
+    # convert keys to readable piano format on backend
+    def convert_key(self):
+        examine = self.keys.split(',') # comma is the built in seperator (thinking forward)
+        temp = ''
+        for letter in examine:
+            if letter in translate:
+                temp += str(translate[letter])
+        self.keys = temp   # the newly concatenated value
+
+
+
     def __repr__(self):
         # object display method
         return f"<Key|{self.key_signature}>"
@@ -116,6 +127,7 @@ class Keysignature(db.Model):
 class Era(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     era = db.Column(db.String(150), nullable=False, unique=True)
+    date = db.Column(db.String(), nullable=False) 
     about_era = db.Column(db.String(), nullable=False) 
     more_info = db.Column(db.String(), nullable=False) 
     composers = db.relationship('Composer', backref='era', lazy=True)
@@ -132,7 +144,7 @@ class Era(db.Model):
     def update(self, **kwargs):
         for key, value in kwargs.items():
             # can update all values for this shell model
-            if key in {'era', 'about_era', 'more_info'}:
+            if key in {'era','date', 'about_era', 'more_info'}:
                 setattr(self, key, value)
         db.session.commit()
     
@@ -145,6 +157,7 @@ class Era(db.Model):
             # dont really need to json the ID here
             'era': self.era,
             'about_era': self.about_era,
+            'date': self.date,
             'more_info': self.more_info,
             ## functioning
             'composers': [composer.to_dict() for composer in Composer.query.filter_by(era_id=self.id).all()]
@@ -247,3 +260,28 @@ class Song(db.Model):
         }
 
 
+##### Translation hash table for method on key signature -- > will correspond to building a key boad
+translate = {
+    'b-sharp': 1,
+    'c': 1,
+    'c-sharp':2,
+    'd-flat':2,  # in this case $ means FLAT in music translation
+    'd':3,
+    'd-sharp':4,
+    'e-flat':4,
+    'e':5,
+    'f-flat':5,
+    'f':6,
+    'f-sharp':7,
+    'g-flat':7,
+    'g':8,
+    'g-sharp':9,
+    'a-flat':9,
+    'a': 'a',
+    'a-sharp':'b',
+    'b-flat':'b',
+    'b': 'c',
+    'c-flat':'c'
+}
+
+keys = ['b-sharp','c','c-sharp','d-flat','d','d-sharp','e-flat','e','f-flat','f','f-sharp','g-flat','g','g-sharp','a-flat','a','a-sharp','b-flat','b','c-flat']

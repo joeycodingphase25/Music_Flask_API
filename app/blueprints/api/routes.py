@@ -87,6 +87,12 @@ def get_eras():
     ## Note that dict of composer objects populate under "composers" key
     return jsonify([e.to_dict() for e in eras])
 
+# Get a Single Era by ID
+@api.route('/era/<int:era_id>')
+def get_single_era(era_id):
+    era = Era.query.get_or_404(era_id)
+    return jsonify(era.to_dict())
+
 
 # CREATE AN ERA
 @api.route('/era/create', methods=['POST'])
@@ -97,15 +103,16 @@ def create_era():
     # Get data from request body
     data = request.json
     # Check to make sure all required fields are present
-    for field in ['era', 'about_era', 'more_info']:
+    for field in ['era','date', 'about_era', 'more_info']:
         if field not in data:
             # if not return a 400 response with error
             return jsonify({'error': f'{field} must be in request body'}), 400
     # Get fields from data dict
     era = data['era']
+    date = data['date']
     about_era = data['about_era']
     more_info = data['more_info']
-    new_era=Era(era=era, about_era=about_era, more_info=more_info)
+    new_era=Era(era=era, date=date, about_era=about_era, more_info=more_info)
     return jsonify(new_era.to_dict()), 201
 
 # EDIT AN ERA
@@ -116,7 +123,7 @@ def edit_era(era_id):
         return jsonify({'error': 'Your request content-type must be application/json'}), 400
     data = request.json
     for key in data.keys():
-        if key not in {'era', 'about_era', 'more_info'}:
+        if key not in {'era', 'date', 'about_era', 'more_info'}:
             return jsonify({'error': f'{key} is not an acceptable property'}), 400
     # filter object needs to be here for some reason
     era = Era.query.filter_by(id=era_id).first()
@@ -135,6 +142,12 @@ def get_composers():
     composers = Composer.query.all()
     ## Note that dict of composer objects populate under "composers" key
     return jsonify([c.to_dict() for c in composers])
+
+# get single composer
+@api.route('/composer/<int:composer_id>')
+def get_single_composer(composer_id): 
+    composer = Composer.query.get_or_404(composer_id)
+    return jsonify(composer.to_dict())
 
 # CREATE A COMPOSER
 @api.route('/composer/create', methods=['POST'])
@@ -186,7 +199,14 @@ def get_songs():
     return jsonify([s.to_dict() for s in songs])
 
 
+# get single song
+@api.route('/song/<int:song_id>')
+def get_single_song(song_id): 
+    song = Song.query.get_or_404(song_id)
+    return jsonify(song.to_dict())
+
 # CREATE A SONG
+## IF THE COMPOSER_ID and SONG NAME ALREADY EXIST DISPLAY AN ERROR MESSAGE
 @api.route('/song/create', methods=['POST'])
 @token_auth.login_required
 def create_song():
