@@ -1,7 +1,7 @@
 from . import api
 from flask import jsonify, request
 from .auth import basic_auth, token_auth
-from app.blueprints.api.models import User, Keysignature, Era, Composer, Song
+from app.blueprints.api.models import User, Keysignature, Era, Composer, Song, translate
 
 
 ################################################
@@ -49,9 +49,13 @@ def create_post():
     # Get fields from data dict
     key_sig = data['key_signature']
     keys = data['keys']
+    new_keys = ''
+    for key in keys.replace(' ', '').split(','):
+        if key in translate: 
+            new_keys += str(translate[key])
     about = data['about']
     more_info = data['more_info']
-    new_key=Keysignature(key_signature=key_sig, keys=keys, about=about, more_info=more_info)
+    new_key=Keysignature(key_signature=key_sig, keys=new_keys, about=about, more_info=more_info)
     return jsonify(new_key.to_dict()), 201
 
 # Edit a key signature 

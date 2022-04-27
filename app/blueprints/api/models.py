@@ -75,7 +75,7 @@ class User(db.Model, UserMixin):
 class Keysignature(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     key_signature = db.Column(db.String(20), unique=True, nullable=False)
-    keys = db.Column(db.String(24), nullable=False) # WILL BE A STRING, can be manipulated later
+    keys = db.Column(db.String(), nullable=False) # WILL BE A STRING, can be manipulated later
     about = db.Column(db.String(), nullable=False)
     more_info = db.Column(db.String(), nullable=False)
     songs = db.relationship('Song', backref='keysignature', lazy=True)
@@ -113,7 +113,7 @@ class Keysignature(db.Model):
 
     def to_dict(self):
         return {
-            # dont really need to json the ID here
+            'key_id': self.id,
             'key_signature': self.key_signature,
             'keys': self.keys,
             'body': self.about,
@@ -154,7 +154,7 @@ class Era(db.Model):
 
     def to_dict(self):
         return {
-            # dont really need to json the ID here
+            'era_id':self.id,
             'era': self.era,
             'about_era': self.about_era,
             'date': self.date,
@@ -202,7 +202,7 @@ class Composer(db.Model):
         ## IMPORTANT ADDED THE SONGS AS A TO_DICT INSTEAD OF A RELATIONSHIP
         ## THIS IS BECAUSE WE WANT A LIST OF SONGS TO POPULATE
         return {
-            # dont really need to json the ID here
+            'composer_id': self.id,
             'composer_name': self.composer_name,
             'more_info': self.more_info,
             'image_url': self.image_url,
@@ -249,7 +249,7 @@ class Song(db.Model):
 
     def to_dict(self):
         return {
-            # dont really need to json the ID here
+            'song_id' : self.id,
             'song_name': self.song_name,
             'song_info': self.song_info,
             'song_link': self.song_link,
