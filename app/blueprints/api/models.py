@@ -5,6 +5,7 @@ from flask_login import UserMixin
 from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 
+
 ###### MODEL BREAKDOWN ############
 # USER model to hold a list of unique users that enables access to platform
 # Key-signature model that will hold the bulk of information AND serve as a Foreign-Key in the SONG model
@@ -46,7 +47,7 @@ class User(db.Model, UserMixin):
         return check_password_hash(self.password, password)
 
     # Token Methods
-    def get_token(self, expires_in=3600):
+    def get_token(self, expires_in=40000):
         now = datetime.utcnow()
         if self.token and self.token_expiration > now + timedelta(seconds=60):
             return self.token
@@ -153,6 +154,7 @@ class Era(db.Model):
         db.session.commit()
 
     def to_dict(self):
+
         return {
             'era_id':self.id,
             'era': self.era,
@@ -206,7 +208,8 @@ class Composer(db.Model):
             'composer_name': self.composer_name,
             'more_info': self.more_info,
             'image_url': self.image_url,
-            'era': self.more_info,
+            'era_id': self.era_id,
+            # FIX THIS TO FIX THE FRONT END
             # fixed
             'songs': [song.to_dict() for song in Song.query.filter_by(composer_id=self.id).all()]
         }        
