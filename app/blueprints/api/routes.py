@@ -79,6 +79,13 @@ def get_keys():
     key_sigs = Keysignature.query.all()
     return jsonify([k.to_dict() for k in key_sigs])
 
+
+# Get a Single Era by ID
+@api.route('/key/<int:key_id>')
+def get_single_key(key_id):
+    key = Keysignature.query.get_or_404(key_id)
+    return jsonify(key.to_dict())
+
 ################################################
 ################ ERA ROUTES ####################
 ################################################
